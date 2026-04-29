@@ -97,7 +97,8 @@ async function loadData(forceRefresh = false) {
         TARGET_CHAINS.includes(p.chain) &&
         p.apy !== null &&
         p.apy > 0 &&
-        p.tvlUsd > 100000 // filter dust
+        p.tvlUsd > 100000 && // filter dust
+        !isExtremeOutlier(p) // filter APY that's likely a data error or tiny new pool
       )
       .map(p => ({
         protocol: p.project,
@@ -172,6 +173,15 @@ function generateIcon(project) {
   ];
   const idx = project.split('').reduce((s, c) => s + c.charCodeAt(0), 0) % colors.length;
   return colors[idx];
+}
+
+function isExtremeOutlier(p) {
+  // APY > 3x the median for same asset+chain likely indicates a data error
+  // or new pool with temporary incentives — filter to keep data credible
+  if (!p.apy || !p.tvlUsd) return false;
+  // If base APY alone is >100% and TVL < $1M, likely a new/honeypot pool
+  if (p.apyBase > 100 && p.tvlUsd < 1_000_000) return true;
+  return false;
 }
 
 function generateProtocolUrl(project, chain) {
