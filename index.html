@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>YieldScan — DeFi Stablecoin Yield Aggregator</title>
-  <meta name="description" content="Compare real-time USDT & USDC yields across 30+ DeFi protocols. Live data from DefiLlama.">
+  <title data-i18n="title">YieldScan — DeFi Stablecoin Yield Aggregator</title>
+  <meta name="description" content="Compare real-time stablecoin yields across DeFi protocols. Live data from DefiLlama.">
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="bg-grid"></div>
@@ -26,14 +26,32 @@
         <span class="logo-text">Yield<span class="logo-accent">Scan</span></span>
       </div>
       <div class="header-right">
+        <!-- Language switcher -->
+        <div class="lang-switcher">
+          <button class="lang-trigger" id="langTrigger" title="Switch language">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+            <span id="langLabel">EN</span>
+          </button>
+          <div class="lang-dropdown" id="langDropdown">
+            <button class="lang-option" data-lang="en">🇺🇸 English</button>
+            <button class="lang-option" data-lang="zh">🇨🇳 中文</button>
+            <button class="lang-option" data-lang="ja">🇯🇵 日本語</button>
+            <button class="lang-option" data-lang="ko">🇰🇷 한국어</button>
+            <button class="lang-option" data-lang="es">🇪🇸 Español</button>
+            <button class="lang-option" data-lang="pt">🇧🇷 Português</button>
+          </div>
+        </div>
+
         <span class="update-badge" id="updateTime">Loading...</span>
-        <button class="icon-btn refresh-btn" id="refreshBtn" title="Refresh data">
+        <button class="icon-btn refresh-btn" id="refreshBtn" title="Refresh data" data-i18n="refreshTitle">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
             <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
           </svg>
         </button>
-        <button class="wallet-btn" id="walletBtn" onclick="connectWallet()">
+        <button class="wallet-btn" id="walletBtn" onclick="connectWallet()" data-i18n="connectWallet">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><circle cx="16" cy="15" r="1"/></svg>
           Connect Wallet
         </button>
@@ -43,59 +61,59 @@
 
   <main class="main">
     <section class="hero">
-      <h1 class="hero-title">Stablecoin Yield <span class="gradient-text">Aggregator</span></h1>
-      <p class="hero-sub">Real-time USDT, USDC & stablecoin yields across 30+ DeFi protocols. Powered by <a href="https://defillama.com" target="_blank" rel="noopener" class="inline-link">DefiLlama</a>.</p>
+      <h1 class="hero-title" data-i18n="heroTitle">Stablecoin Yield <span class="gradient-text">Aggregator</span></h1>
+      <p class="hero-sub" data-i18n="heroSub">Real-time USDT, USDC & stablecoin yields across 30+ DeFi protocols. Powered by DefiLlama.</p>
     </section>
 
     <section class="stats-row" id="statsRow">
       <div class="stat-card">
-        <span class="stat-label">Best USDT APY</span>
+        <span class="stat-label" data-i18n="bestUsdt">Best USDT APY</span>
         <span class="stat-value gradient-text" id="bestUsdt">—</span>
       </div>
       <div class="stat-card">
-        <span class="stat-label">Best USDC APY</span>
+        <span class="stat-label" data-i18n="bestUsdc">Best USDC APY</span>
         <span class="stat-value gradient-text" id="bestUsdc">—</span>
       </div>
       <div class="stat-card">
-        <span class="stat-label">Protocols Tracked</span>
+        <span class="stat-label" data-i18n="protoCount">Protocols Tracked</span>
         <span class="stat-value" id="protoCount">—</span>
       </div>
       <div class="stat-card">
-        <span class="stat-label">Avg. Stable APY</span>
+        <span class="stat-label" data-i18n="avgApy">Avg. Stable APY</span>
         <span class="stat-value" id="avgApy">—</span>
       </div>
     </section>
 
     <section class="filters">
       <div class="filter-group">
-        <label class="filter-label">Asset</label>
+        <label class="filter-label" data-i18n="assetLabel">Asset</label>
         <div class="chip-group" id="assetFilter">
-          <button class="chip active" data-value="all">All</button>
+          <button class="chip active" data-value="all" data-i18n-chip="filterAll">All</button>
         </div>
       </div>
       <div class="filter-group">
-        <label class="filter-label">Risk Level</label>
+        <label class="filter-label" data-i18n="riskLabel">Risk Level</label>
         <div class="chip-group" id="riskFilter">
-          <button class="chip active" data-value="all">All</button>
-          <button class="chip" data-value="Low">🟢 Low</button>
-          <button class="chip" data-value="Medium">🟡 Medium</button>
-          <button class="chip" data-value="High">🔴 High</button>
+          <button class="chip active" data-value="all" data-i18n-chip="filterAll">All</button>
+          <button class="chip" data-value="Low" data-i18n-chip="riskLow">🟢 Low</button>
+          <button class="chip" data-value="Medium" data-i18n-chip="riskMed">🟡 Medium</button>
+          <button class="chip" data-value="High" data-i18n-chip="riskHigh">🔴 High</button>
         </div>
       </div>
       <div class="filter-group">
-        <label class="filter-label">Chain</label>
+        <label class="filter-label" data-i18n="chainLabel">Chain</label>
         <div class="chip-group" id="chainFilter">
-          <button class="chip active" data-value="all">All</button>
+          <button class="chip active" data-value="all" data-i18n-chip="filterAll">All</button>
         </div>
       </div>
       <div class="filter-group">
-        <label class="filter-label">Type</label>
+        <label class="filter-label" data-i18n="typeLabel">Type</label>
         <div class="chip-group" id="typeFilter">
-          <button class="chip active" data-value="all">All</button>
-          <button class="chip" data-value="Lending">Lending</button>
-          <button class="chip" data-value="DEX LP">DEX LP</button>
-          <button class="chip" data-value="Yield">Yield</button>
-          <button class="chip" data-value="Liquid Staking">Liquid Staking</button>
+          <button class="chip active" data-value="all" data-i18n-chip="filterAll">All</button>
+          <button class="chip" data-value="Lending" data-i18n-chip="typeLending">Lending</button>
+          <button class="chip" data-value="DEX LP" data-i18n-chip="typeDexLp">DEX LP</button>
+          <button class="chip" data-value="Yield" data-i18n-chip="typeYield">Yield</button>
+          <button class="chip" data-value="Liquid Staking" data-i18n-chip="typeLsd">Liquid Staking</button>
         </div>
       </div>
     </section>
@@ -104,13 +122,13 @@
       <table class="yield-table" id="yieldTable">
         <thead>
           <tr>
-            <th class="sortable" data-sort="protocol">Protocol <span class="sort-icon"></span></th>
-            <th class="sortable" data-sort="asset">Asset</th>
-            <th class="sortable" data-sort="chain">Chain</th>
-            <th class="sortable" data-sort="type">Type</th>
-            <th class="sortable" data-sort="apy">APY <span class="sort-icon">↓</span></th>
-            <th class="sortable" data-sort="tvl">TVL</th>
-            <th class="sortable" data-sort="risk">Risk</th>
+            <th class="sortable" data-sort="protocol"><span data-i18n-th="thProtocol">Protocol</span> <span class="sort-icon"></span></th>
+            <th class="sortable" data-sort="asset"><span data-i18n-th="thAsset">Asset</span></th>
+            <th class="sortable" data-sort="chain"><span data-i18n-th="thChain">Chain</span></th>
+            <th class="sortable" data-sort="type"><span data-i18n-th="thType">Type</span></th>
+            <th class="sortable" data-sort="apy"><span data-i18n-th="thApy">APY</span> <span class="sort-icon">↓</span></th>
+            <th class="sortable" data-sort="tvl"><span data-i18n-th="thTvl">TVL</span></th>
+            <th class="sortable" data-sort="risk"><span data-i18n-th="thRisk">Risk</span></th>
             <th style="width:32px"></th>
           </tr>
         </thead>
@@ -119,8 +137,8 @@
     </section>
 
     <footer class="footer">
-      <p>📊 Data: <a href="https://defillama.com" target="_blank" rel="noopener" class="inline-link">DefiLlama</a> • Auto-refreshes every 5 min</p>
-      <p class="footer-disclaimer">⚠️ Not financial advice. DYOR. APY subject to change based on market conditions. Rates include base APY + reward APY where applicable.</p>
+      <p id="footerData">📊 Data: DefiLlama • Auto-refreshes every 5 min</p>
+      <p class="footer-disclaimer" id="footerDisclaimer">⚠️ Not financial advice. DYOR. APY subject to change.</p>
     </footer>
   </main>
 
