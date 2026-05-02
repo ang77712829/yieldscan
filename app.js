@@ -37,6 +37,7 @@ const I18N = {
   typeDexLp: { en: 'DEX LP', zh: 'DEX LP', ja: 'DEX LP', ko: 'DEX LP', es: 'DEX LP', pt: 'DEX LP' },
   typeYield: { en: 'Yield', zh: '收益', ja: 'イールド', ko: '수익', es: 'Rendimiento', pt: 'Rendimento' },
   typeLsd: { en: 'Liquid Staking', zh: '流动质押', ja: 'リキッドステーキング', ko: '리퀴드 스테이킹', es: 'Staking Líquido', pt: 'Staking Líquido' },
+  typeOther: { en: 'Other', zh: '其他', ja: 'その他', ko: '기타', es: 'Otros', pt: 'Outros' },
   thProtocol: { en: 'Protocol', zh: '协议', ja: 'プロトコル', ko: '프로토콜', es: 'Protocolo', pt: 'Protocolo' },
   thAsset: { en: 'Asset', zh: '资产', ja: '資産', ko: '자산', es: 'Activo', pt: 'Ativo' },
   thChain: { en: 'Chain', zh: '链', ja: 'チェーン', ko: '체인', es: 'Red', pt: 'Rede' },
@@ -298,10 +299,10 @@ function mapType(exposure, category) {
   if (category === 'Yield' || category === 'Yield Aggregator') return 'Yield';
   if (category === 'Liquid Staking') return 'Liquid Staking';
   if (exposure === 'multi') return 'DEX LP';
-  return 'Lending';
+  return 'Other';
 }
 
-function classifyRisk(project) {
+function classifyRisk(project, p) {
   for (const [key, risk] of Object.entries(RISK_MAP)) {
     if (project.toLowerCase().includes(key.toLowerCase())) return risk;
   }
@@ -395,7 +396,7 @@ function translatedRisk(risk) {
 }
 
 function translatedType(type) {
-  const map = { 'Lending': 'typeLending', 'DEX LP': 'typeDexLp', 'Yield': 'typeYield', 'Liquid Staking': 'typeLsd' };
+  const map = { 'Lending': 'typeLending', 'DEX LP': 'typeDexLp', 'Yield': 'typeYield', 'Liquid Staking': 'typeLsd', 'Other': 'typeOther' };
   const key = map[type] || type;
   return I18N[key]?.[currentLang] || type;
 }
@@ -495,9 +496,7 @@ function renderTable() {
 }
 
 function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 function escapeAttr(str) {
