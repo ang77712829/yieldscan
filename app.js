@@ -83,7 +83,8 @@ function setLang(lang) {
     const text = entry[currentLang] || entry['en'];
     if (!text) return;
 
-    // Handle <span> inside (for gradient text in heroTitle)
+    // SECURITY: innerHTML used only for hardcoded I18N text containing <span> tags.
+    // Safe because all values come from the static I18N object, not user input.
     if (text.includes('<span')) {
       el.innerHTML = text;
     } else {
@@ -128,7 +129,6 @@ function setLang(lang) {
   document.title = I18N['title']?.[lang] || I18N['title']?.['en'] || 'YieldScan';
 
   // Re-render table (for loading state and risk labels etc.)
-  renderAll();
 }
 
 function detectLang() {
@@ -147,6 +147,10 @@ function detectLang() {
 
 // ── Protocol data ──
 const STABLECOIN_SYMBOLS = ['USDC', 'USDT', 'DAI', 'USDe', 'FRAX', 'sUSDe'];
+function isStablecoinSymbol(poolSymbol) {
+  return STABLECOIN_SYMBOLS.some(s => poolSymbol === s || poolSymbol.startsWith(s + '.e'));
+}
+
 const TARGET_CHAINS = ['Ethereum', 'Arbitrum', 'Optimism', 'Base', 'Solana', 'Polygon', 'Avalanche', 'BNB Chain'];
 const RISK_MAP = {
   'Aave V3': 'Low', 'Aave V2': 'Low',
@@ -242,7 +246,7 @@ async function loadData(forceRefresh = false) {
 
     yieldData = pools
       .filter(p =>
-        STABLECOIN_SYMBOLS.includes(p.symbol) &&
+        isStablecoinSymbol(p.symbol) &&
         TARGET_CHAINS.includes(p.chain) &&
         p.apy !== null &&
         p.apy > 0 &&
@@ -263,7 +267,7 @@ async function loadData(forceRefresh = false) {
         tvlRaw: p.tvlUsd,
         risk: classifyRisk(p.project, p),
         ilRisk: p.ilRisk || 'no',
-        stablecoin: p.stablecoin || true,
+        stablecoin: !!p.stablecoin,
         audit: p.audit || false,
         url: generateProtocolUrl(p.project, p.chain),
         icon: generateIcon(p.project),
@@ -303,10 +307,19 @@ function mapType(exposure, category) {
 }
 
 function classifyRisk(project, p) {
+  // Check protocol name in risk map first
   for (const [key, risk] of Object.entries(RISK_MAP)) {
     if (project.toLowerCase().includes(key.toLowerCase())) return risk;
   }
-  return 'Medium';
+  // Enhance risk assessment based on pool data
+  let base = 'Medium';
+  if (p.tvlUsd && p.tvlUsd < 1e6) base = 'Medium'; // TVL < $1M stays Medium
+  if (p.apy && p.apy > 50) base = 'High';           // APY > 50% is risky
+  if (p.audit === true || p.audit === 'yes') {
+    // Audited protocols can be downgraded one level
+    if (base === 'High') base = 'Medium';
+  }
+  return base;
 }
 
 function generateIcon(project) {
@@ -353,6 +366,7 @@ function renderAll() {
   updateChainFilter();
   updateAssetFilter();
   renderTable();
+  bindRowClicks();
   updateTimestamp();
 }
 
@@ -368,11 +382,14 @@ function applyFilters() {
 
 function applySort() {
   filtered.sort((a, b) => {
-    let va = a[sortKey], vb = b[sortKey];
-    if (typeof va === 'string') va = va.toLowerCase(), vb = vb.toLowerCase();
-    if (typeof va === 'string' && va.startsWith('$')) {
-      va = parseFloat(va.replace(/[$BMK]/g, ''));
-      vb = parseFloat(vb.replace(/[$BMK]/g, ''));
+    let va = a[sortKey];
+    let vb = b[sortKey];
+    if (sortKey === 'tvl') {
+      va = parseTVL(va);
+      vb = parseTVL(vb);
+    } else if (typeof va === 'string') {
+      va = va.toLowerCase();
+      vb = vb.toLowerCase();
     }
     if (sortDir === 'asc') return va > vb ? 1 : -1;
     return va < vb ? 1 : -1;
@@ -381,10 +398,12 @@ function applySort() {
 
 function updateStats() {
   const best = [...yieldData].sort((a, b) => b.apy - a.apy);
+  const usdtApy = best.filter(r => r.asset === 'USDT')[0]?.apy;
+  const usdcApy = best.filter(r => r.asset === 'USDC')[0]?.apy;
   document.getElementById('bestUsdt').textContent =
-    best.filter(r => r.asset === 'USDT')[0]?.apy.toFixed(2) + '%' || '—';
+    usdtApy != null ? usdtApy.toFixed(2) + '%' : '—';
   document.getElementById('bestUsdc').textContent =
-    best.filter(r => r.asset === 'USDC')[0]?.apy.toFixed(2) + '%' || '—';
+    usdcApy != null ? usdcApy.toFixed(2) + '%' : '—';
   document.getElementById('protoCount').textContent =
     [...new Set(yieldData.map(r => r.protocol))].length || '—';
   document.getElementById('avgApy').textContent =
@@ -476,7 +495,7 @@ function renderTable() {
     const typeLabel = translatedType(row.type);
     const viewTitle = escapeAttr(t('viewDefiLlama'));
 
-    return `<tr style="cursor:pointer" onclick="window.open('${escapeAttr(row.url)}', '_blank')" title="${viewTitle}">
+    return `<tr style="cursor:pointer" data-url="${escapeAttr(row.url)}" title="${viewTitle}">
       <td><div class="protocol-cell">
         <div class="protocol-icon" style="background:${row.icon}">${row.protocol[0]?.toUpperCase() || '?'}</div>
         <div>
@@ -499,6 +518,14 @@ function escapeHtml(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
+function bindRowClicks() {
+  document.querySelectorAll('#tableBody tr[data-url]').forEach(row => {
+    row.addEventListener('click', () => {
+      window.open(row.getAttribute('data-url'), '_blank');
+    });
+  });
+}
+
 function escapeAttr(str) {
   return str.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
@@ -508,6 +535,17 @@ function formatTVL(usd) {
   if (usd >= 1e6) return '$' + (usd / 1e6).toFixed(1) + 'M';
   if (usd >= 1e3) return '$' + (usd / 1e3).toFixed(0) + 'K';
   return '$' + usd.toFixed(0);
+}
+
+function parseTVL(str) {
+  const match = str.match(/\$?([\d.]+)([BMK]?)/);
+  if (!match) return 0;
+  const num = parseFloat(match[1]);
+  const unit = match[2];
+  if (unit === 'B') return num * 1e9;
+  if (unit === 'M') return num * 1e6;
+  if (unit === 'K') return num * 1e3;
+  return num;
 }
 
 // ── Filters ──

@@ -2,14 +2,14 @@
 
 A single-page dashboard that compares real-time USDT and USDC yields across major DeFi protocols. Built with pure HTML/CSS/JS — no frameworks, no build step.
 
-![YieldScan Screenshot](screenshot.png)
+
 
 ## ✨ Features
 
-- 📊 Compare USDT/USDC yields across **20 positions** from **15+ protocols**
-- 🎛️ Filter by **risk level** (Low / Medium / High), **chain**, and **protocol type**
+- 📊 Compare USDT/USDC yields across **30+ positions** from **20+ protocols**
+- 🎛️ Filter by **risk level** (Low / Medium / High), **chain**, **asset**, and **protocol type**
 - 📈 Sort by APY, TVL, or any column
-- 🌐 Multi-chain coverage: Ethereum, Arbitrum, Optimism, Base, Solana, BNB Chain
+- 🌐 Multi-chain coverage: Ethereum, Arbitrum, Optimism, Base, Solana, Polygon, Avalanche, BNB Chain
 - 🎨 Dark-themed UI with glassmorphism cards and gradient accents
 - 📱 Fully responsive — works on mobile, tablet, and desktop
 - 🔌 "Connect Wallet" button ready for Web3 integration
@@ -64,7 +64,7 @@ yieldscan/
 
 ## 🔮 Roadmap
 
-- [ ] Live API integration (DefiLlama / protocol SDKs)
+- [x] Live API integration (DefiLlama)
 - [ ] Wallet connection (RainbowKit / Wagmi)
 - [ ] One-click deposit into best-yield pools
 - [ ] Historical APY charts
